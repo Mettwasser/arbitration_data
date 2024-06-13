@@ -1,47 +1,28 @@
 use serde::{Deserialize, Serialize};
+use serde_repr::Deserialize_repr;
 use std::collections::HashMap;
 
-use crate::Result;
+pub type ExportRegions<'a> = HashMap<&'a str, SolNodeMapValue>;
 
-use super::dict::LanguageDict;
-
-pub type SolNodeMap<'a> = HashMap<&'a str, SolNodeMapValue>;
-
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct SolNodeMapValue {
-    name: String, // needs map
+    #[serde(rename = "name")]
+    pub(crate) node: String, // needs map
 
-    system_index: i64,
+    #[serde(rename = "systemName")]
+    pub(crate) planet: String, // needs map
 
-    system_name: String, // needs map
+    #[serde(rename = "missionName")]
+    pub(crate) mission_type: String, // needs map
 
-    node_type: i64,
+    #[serde(rename = "factionIndex")]
+    pub(crate) faction: Faction,
 
-    mastery_req: i64,
-
-    mission_index: i64,
-
-    mission_name: String, // needs map
-
-    faction_index: i64,
-
-    faction_name: String, // needs
-
-    min_enemy_level: i64,
-
-    max_enemy_level: i64,
-
-    dark_sector_data: Option<DarkSectorData>,
-
-    mastery_exp: Option<i64>,
-
-    secondary_faction_index: Option<i64>,
-
-    secondary_faction_name: Option<String>,
+    pub(crate) dark_sector_data: Option<DarkSectorData>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DarkSectorData {
     resource_bonus: f64,
@@ -53,25 +34,21 @@ pub struct DarkSectorData {
     weapon_xp_bonus_val: f64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WeaponXpBonusFor {
     Melee,
-
     Pistols,
-
     Rifles,
-
     Shotguns,
 }
 
-fn make_to_region_dict<'a>(s: &'a str, dict: LanguageDict<'a>) -> Result<SolNodeMap<'a>> {
-    let mut sol_node_map: SolNodeMap = serde_json::from_str(s)?;
-    let final_map: SolNodeMap = HashMap::new();
-
-    for (key, mut value) in sol_node_map.iter_mut() {
-        if let Some(&actual_name) = dict.get(value.name.as_ref()) {
-            sol_node_map.;
-        }
-    }
-    Ok(sol_node_map)
+#[derive(Serialize, Deserialize_repr, Debug, Clone)]
+#[repr(u8)]
+pub enum Faction {
+    Grineer,
+    Corpus,
+    Infested,
+    Orokin,
+    Sentient = 5,
+    Murmur = 7,
 }

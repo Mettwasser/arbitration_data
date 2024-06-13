@@ -109,7 +109,13 @@ pub(crate) fn get_short_format_time_string(dt: DateTime) -> String {
     let now = Utc::now();
     let mut time_in_between = (if now > dt { now - dt } else { dt - now }).num_seconds();
 
-    let components = [("h", 60 * 60), ("m", 60), ("s", 1)];
+    let components = [
+        ("w", 60 * 60 * 24 * 7),
+        ("d", 60 * 60 * 24),
+        ("h", 60 * 60),
+        ("m", 60),
+        ("s", 1),
+    ];
 
     let mut formatted_time = String::new();
 

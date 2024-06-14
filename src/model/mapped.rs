@@ -1,12 +1,15 @@
 use std::{
-    collections::HashMap,
+    collections::{BTreeMap, HashMap},
     ops::{Div, Rem},
 };
 
 use chrono::{Duration, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::{DateTime, Result};
+use crate::{
+    error::{ParseError, ToResult},
+    DateTime,
+};
 
 use heck::ToTitleCase;
 
@@ -15,7 +18,7 @@ use super::{
     regions::{DarkSectorData, ExportRegions, Faction},
 };
 
-const MAP_RANKING: phf::Map<&str, Tier> = phf::phf_map!(
+pub const MAP_RANKING: phf::Map<&str, Tier> = phf::phf_map!(
     "Cinxia" => Tier::S,
     "Casta" => Tier::S,
     "Seimeni" => Tier::S,
@@ -109,7 +112,7 @@ pub(crate) fn get_short_format_time_string(dt: DateTime) -> String {
     let now = Utc::now();
     let mut time_in_between = (if now > dt { now - dt } else { dt - now }).num_seconds();
 
-    let components = [
+    const TIME_COMPONENTS: [(&str, i64); 5] = [
         ("w", 60 * 60 * 24 * 7),
         ("d", 60 * 60 * 24),
         ("h", 60 * 60),
@@ -119,7 +122,7 @@ pub(crate) fn get_short_format_time_string(dt: DateTime) -> String {
 
     let mut formatted_time = String::new();
 
-    for &(suffix, divisor) in &components {
+    for &(suffix, divisor) in &TIME_COMPONENTS {
         let (div_time, mod_time) = divmod(time_in_between, divisor);
         if div_time > 0 {
             formatted_time.push_str(&format!("{}{} ", div_time, suffix));
@@ -128,7 +131,10 @@ pub(crate) fn get_short_format_time_string(dt: DateTime) -> String {
     }
     if now > dt {
         formatted_time.push_str("ago")
+    } else {
+        formatted_time = format!("in {}", formatted_time)
     }
+
     formatted_time.trim().to_string()
 }
 
@@ -136,19 +142,19 @@ pub(crate) fn make_to_arbi_data(
     arbi_time_node_mapping: csv::Reader<&[u8]>,
     export_regions: ExportRegions,
     language_dict: LanguageDict,
-) -> Result<HashMap<i64, ArbitrationInfo>> {
-    let mut arbi_data = HashMap::<i64, ArbitrationInfo>::new();
+) -> std::result::Result<BTreeMap<i64, ArbitrationInfo>, ParseError> {
+    let mut arbi_data = BTreeMap::<i64, ArbitrationInfo>::new();
     let mut reader = arbi_time_node_mapping;
     reader.set_headers(vec!["time", "node"].into());
 
     for row in reader.deserialize() {
-        let row: ArbitrationTimeMappingRow = row?;
+        let row: ArbitrationTimeMappingRow = row.map_err(ParseError::Csv)?;
 
         let node: String;
         let planet: String;
         let mission_type: String;
         let tier: Tier;
-        let activation = Utc.timestamp_opt(row.time, 0).unwrap();
+        let activation = Utc.timestamp_opt(row.time, 0).to_result()?;
         let expiry = activation + Duration::hours(1);
         let eta = get_short_format_time_string(activation);
 

@@ -13,11 +13,10 @@ where
     T: Timelike,
 {
     fn hour_only(&self) -> Result<Self> {
-        Ok(self
-            .with_minute(0)
+        self.with_minute(0)
             .and_then(|dt| dt.with_second(0))
             .and_then(|dt| dt.with_nanosecond(0))
-            .ok_or(Error::InvalidatedDateTime)?)
+            .ok_or(Error::InvalidatedDateTime)
     }
 }
 

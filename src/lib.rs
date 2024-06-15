@@ -59,14 +59,6 @@ impl ArbitrationData {
             .ok_or(Error::DataNotFound)
     }
 
-    fn upcoming_at(&self, dt: DateTime) -> Result<&ArbitrationInfo> {
-        let next_hour = (dt + Duration::hours(1)).hour_only()?;
-
-        self.inner
-            .get(&next_hour.timestamp())
-            .ok_or(Error::DataNotFound)
-    }
-
     pub fn upcoming_by_tier(&self, tier: Tier) -> Result<&ArbitrationInfo> {
         let mut next = Utc::now().hour_only()?.timestamp();
 
@@ -96,7 +88,6 @@ impl ArbitrationData {
 mod test {
     use std::error::Error;
 
-    use chrono::Utc;
     use csv::Reader;
 
     use crate::{

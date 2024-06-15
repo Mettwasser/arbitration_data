@@ -69,7 +69,7 @@ struct ArbitrationTimeMappingRow {
     node: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd, derive_more::Display)]
 pub enum Tier {
     S,
     A,

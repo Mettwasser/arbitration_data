@@ -42,7 +42,7 @@ pub enum WeaponXpBonusFor {
     Shotguns,
 }
 
-#[derive(Serialize, Deserialize_repr, Debug, Clone)]
+#[derive(Serialize, Deserialize_repr, Debug, Clone, derive_more::Display)]
 #[repr(u8)]
 pub enum Faction {
     Grineer,

@@ -7,7 +7,7 @@ use chrono::{Duration, Utc};
 use error::{Error, ParseError};
 use model::{
     dict::LanguageDict,
-    mapped::{make_to_arbi_data, ArbitrationInfo, Tier},
+    mapped::{make_to_arbi_data, ArbitrationInfo},
     regions::SolNodeMapValue,
 };
 use time_calc::HourOnly;
@@ -15,6 +15,9 @@ use time_calc::HourOnly;
 pub mod error;
 pub mod model;
 pub mod time_calc;
+
+pub use model::mapped::Tier;
+pub use model::regions::Faction;
 
 pub type Result<T> = std::result::Result<T, Error>;
 pub type DateTime = chrono::DateTime<chrono::Utc>;
